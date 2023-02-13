@@ -1,15 +1,15 @@
 arguments:
-  class_options: {1: 0, -1: 0, 13: 1, -13: 1, 12: 2, -12: 2, 14: 2, -14: 2, 16: 2, -16: 2}
+  # class_options: {'1': 0, '-1': 0, '-11': 1, '11': 1}
   coarsening: null
   detector:
     ModelConfig:
       arguments:
         graph_builder:
           ModelConfig:
-            arguments: {columns: null, device: null, nb_nearest_neighbours: 8}
+            arguments: {columns: null, nb_nearest_neighbours: 8}
             class_name: KNNGraphBuilder
         scalers: null
-      class_name: IceCubeDeepCore
+      class_name: POne
   gnn:
     ModelConfig:
       arguments:
@@ -17,7 +17,7 @@ arguments:
         dynedge_layer_sizes: null
         features_subset: null
         global_pooling_schemes: [min, max, mean, sum]
-        nb_inputs: 7
+        nb_inputs: 6
         nb_neighbours: 8
         post_processing_layer_sizes: null
         readout_layer_sizes: null
@@ -33,13 +33,14 @@ arguments:
         hidden_size: 128
         loss_function:
           ModelConfig:
-            arguments: {options=general_config["class_options"]}
+            arguments:
+              options: {'1': 0, '-1': 0, '-11': 1, '11': 1}
             class_name: CrossEntropyLoss
-        nb_outputs: 1
         loss_weight: null
         target_labels: pid
+        nb_outputs: 1
         transform_inference: '!lambda x: softmax(x, dim=-1)'
-        transform_prediction: null
+        transform_prediction_and_target: null
         transform_support: null
         transform_target: null
       class_name: MulticlassClassificationTask
