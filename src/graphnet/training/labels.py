@@ -43,3 +43,17 @@ class Direction(Label):
         ).reshape(-1, 1)
         z = torch.cos(graph[self._zenith_key]).reshape(-1, 1)
         return torch.cat((x, y, z), dim=1)
+
+class Noise(Label):
+    """Class for labeling all events with negative Energy as noise"""
+
+    def __init__(
+            self, energy_key: str = "energy"
+    ):
+        """Construct `Noise`."""
+        self._energy_key = energy_key
+
+    def __call__(self, graph: Data) -> torch.tensor:
+        """Compute label for `graph`."""
+        is_noise = (graph[self._energy_key] <= 0).float()
+        return is_noise

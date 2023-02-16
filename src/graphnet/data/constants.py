@@ -30,6 +30,14 @@ class FEATURES:
         "t",
     ]
     KAGGLE = ["x", "y", "z", "time", "charge", "auxiliary"]
+    PONE = [
+        'pmt_x',
+        'pmt_y',
+        'pmt_z',
+        'pmt_azimuth',
+        'pmt_zenith',
+        'time',
+    ]
 
 
 class TRUTH:
@@ -82,3 +90,13 @@ class TRUTH:
         "total_energy",
     ]
     KAGGLE = ["zenith", "azimuth"]
+    PONE = [
+        "energy",
+        "interaction_x",
+        "interaction_y",
+        "interaction_z",
+        "azimuth",
+        "zenith",
+        "pid",
+        "interaction_type"
+    ]
