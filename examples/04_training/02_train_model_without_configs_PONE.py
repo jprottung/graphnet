@@ -1,17 +1,18 @@
 """Example of training Model."""
 
 import os
+import time
 from typing import Any, Dict, List, Optional
 
 from pytorch_lightning.callbacks import EarlyStopping
 import torch
 from torch.optim.adam import Adam
 
-from graphnet.constants import EXAMPLE_DATA_DIR, EXAMPLE_OUTPUT_DIR
+from graphnet.constants import GRAPHNET_ROOT_DIR, EXAMPLE_OUTPUT_DIR
 from graphnet.data.constants import FEATURES, TRUTH
 from graphnet.models import StandardModel
 from graphnet.models.detector.pone import POne
-from graphnet.models.gnn import DynEdge
+from graphnet.models.gnn import DynEdge, DynEdgeJINST, ConvNet
 from graphnet.models.graph_builders import KNNGraphBuilder
 from graphnet.models.task.classification import BinaryClassificationTask
 from graphnet.training.callbacks import ProgressBar, PiecewiseLinearLR
@@ -29,15 +30,15 @@ truth = TRUTH.PONE
 
 
 def main(
-    path: str,
-    pulsemap: str,
-    target: str,
-    truth_table: str,
-    gpus: Optional[List[int]],
-    max_epochs: int,
-    early_stopping_patience: int,
-    batch_size: int,
-    num_workers: int,
+        path: str,
+        pulsemap: str,
+        target: str,
+        truth_table: str,
+        gpus: Optional[List[int]],
+        max_epochs: int,
+        early_stopping_patience: int,
+        batch_size: int,
+        num_workers: int,
 ) -> None:
     """Run example."""
     logger.info(f"features: {features}")
@@ -57,7 +58,15 @@ def main(
         },
     }
 
-    archive = os.path.join(EXAMPLE_OUTPUT_DIR, "train_model_without_configs_PONE")
+    t = time.localtime()
+    current_time = time.strftime("%Y%m%d_%H%M%S", t)
+
+    archive = os.path.join(
+        GRAPHNET_ROOT_DIR,
+        "../data/combined_10_20/{}_train_model_without_configs_PONE".format(
+            current_time
+        )
+    )
     run_name = "dynedge_{}_example_PONE".format(config["target"])
 
     (
@@ -81,8 +90,25 @@ def main(
     detector = POne(
         graph_builder=KNNGraphBuilder(nb_nearest_neighbours=8),
     )
+    # gnn = DynEdgeJINST(
+    #     nb_inputs=detector.nb_outputs,
+    #     layer_size_scale=2
+    # )
+    # gnn = ConvNet(
+    #     nb_inputs=detector.nb_outputs,
+    #     nb_intermediate=8,
+    #     dropout_ratio=0.3,
+    #     nb_outputs=1,
+    # )
     gnn = DynEdge(
         nb_inputs=detector.nb_outputs,
+        dynedge_layer_sizes=[
+            (4, 8),
+            (16, 8),
+            (16, 8),
+            (16, 8)
+        ],
+        post_processing_layer_sizes=[16,8],
         global_pooling_schemes=["min", "max", "mean", "sum"],
     )
     task = BinaryClassificationTask(
@@ -148,7 +174,6 @@ def main(
 
 
 if __name__ == "__main__":
-
     # Parse command-line arguments
     parser = ArgumentParser(
         description="""
@@ -159,7 +184,7 @@ Train GNN model without the use of config files.
     parser.add_argument(
         "--path",
         help="Path to dataset file (default: %(default)s)",
-        default=f"{EXAMPLE_DATA_DIR}/output/convert_parquet_to_sqlite/data/test.db",
+        default=f"{GRAPHNET_ROOT_DIR}/../data/combined_10_20/graphnet.db",
     )
 
     parser.add_argument(
@@ -174,7 +199,7 @@ Train GNN model without the use of config files.
             "Name of feature to use as regression target (default: "
             "%(default)s)"
         ),
-        default="energy",
+        default="is_noise",
     )
 
     parser.add_argument(
@@ -184,10 +209,10 @@ Train GNN model without the use of config files.
     )
 
     parser.with_standard_arguments(
-        "gpus",
-        ("max-epochs", 5),
+        ("gpus", 1),
+        ("max-epochs", 16),
         "early-stopping-patience",
-        ("batch-size", 16),
+        ("batch-size", 8),
         "num-workers",
     )
 
