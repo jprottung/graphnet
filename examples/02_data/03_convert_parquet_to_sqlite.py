@@ -10,7 +10,7 @@ from graphnet.utilities.logging import get_logger
 logger = get_logger()
 
 
-def main(parquet_path: str, mc_truth_table: str) -> None:
+def main(parquet_path: str, mc_truth_table: str, index_column: str) -> None:
     """Run example."""
     # Path to where you want the database to be stored
     outdir = f"{EXAMPLE_OUTPUT_DIR}/convert_parquet_to_sqlite/"
@@ -29,6 +29,7 @@ def main(parquet_path: str, mc_truth_table: str) -> None:
 
     converter = ParquetToSQLiteConverter(
         mc_truth_table=mc_truth_table,
+        index_column=index_column,
         parquet_path=parquet_path,
     )
     converter.run(outdir=outdir, database_name=database_name)
@@ -55,7 +56,13 @@ Convert Parquet files to SQLite database.
         help="Name of MC truth table in Parquet file (default: %(default)s)",
         default="truth",
     )
+    parser.add_argument(
+        "--index-column",
+        action="store",
+        help="Name of index column in Parquet file (default: %(default)s)",
+        default="event_no",
+    )
 
     args = parser.parse_args()
 
-    main(args.parquet_path, args.mc_truth_table)
+    main(args.parquet_path, args.mc_truth_table, args.index_column)

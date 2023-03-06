@@ -16,7 +16,7 @@ from graphnet.models.gnn import DynEdge, DynEdgeJINST, ConvNet
 from graphnet.models.graph_builders import KNNGraphBuilder
 from graphnet.models.task.classification import BinaryClassificationTask
 from graphnet.training.callbacks import ProgressBar, PiecewiseLinearLR
-from graphnet.training.labels import Noise
+from graphnet.training.labels import IsPositive
 from graphnet.training.loss_functions import LogCoshLoss, BinaryCrossEntropyLoss
 from graphnet.training.utils import make_train_validation_dataloader
 from graphnet.utilities.argparse import ArgumentParser
@@ -63,7 +63,7 @@ def main(
 
     archive = os.path.join(
         GRAPHNET_ROOT_DIR,
-        "../data/combined_10_20/{}_train_model_without_configs_PONE".format(
+        "../data/combined_10_20_redistributed/{}_train_model_without_configs_PONE".format(
             current_time
         )
     )
@@ -82,7 +82,7 @@ def main(
         num_workers=config["num_workers"],
         truth_table=truth_table,
         labels={
-            'is_noise': Noise()
+            'is_event': IsPositive(key='energy')
         }
     )
 
@@ -184,7 +184,7 @@ Train GNN model without the use of config files.
     parser.add_argument(
         "--path",
         help="Path to dataset file (default: %(default)s)",
-        default=f"{GRAPHNET_ROOT_DIR}/../data/combined_10_20/graphnet.db",
+        default=f"{GRAPHNET_ROOT_DIR}/../data/combined_10_20_redistributed/graphnet.db",
     )
 
     parser.add_argument(

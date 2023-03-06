@@ -3,18 +3,12 @@
 from torch_geometric.data import Data
 
 from graphnet.models.detector.detector import Detector
+from graphnet.data.constants import FEATURES
 
 class POne(Detector):
     """`Detector` class for P-One prototype"""
 
-    features = [
-        'pmt_x',
-        'pmt_y',
-        'pmt_z',
-        'pmt_azimuth',
-        'pmt_zenith',
-        'time',
-    ]
+    features = FEATURES.PONE
 
     def _forward(self, data: Data) -> Data:
         """Ingest data, build graph, and preprocess features.

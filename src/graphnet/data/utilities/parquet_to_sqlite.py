@@ -25,6 +25,7 @@ class ParquetToSQLiteConverter(LoggerMixin):
         self,
         parquet_path: Union[str, List[str]],
         mc_truth_table: str = "mc_truth",
+        index_column: str = "event_no",
         excluded_fields: Optional[Union[str, List[str]]] = None,
     ):
         """Construct `ParquetToSQLiteConverter`."""
@@ -50,6 +51,7 @@ class ParquetToSQLiteConverter(LoggerMixin):
             self._excluded_fields = []
         self._mc_truth_table = mc_truth_table
         self._event_counter = 0
+        self._index_column= index_column
 
     def _find_parquet_files(self, paths: Union[str, List[str]]) -> List[str]:
         if isinstance(paths, str):
@@ -126,6 +128,7 @@ class ParquetToSQLiteConverter(LoggerMixin):
             df,
             field_name,
             database_path,
+            index_column=self._index_column,
             integer_primary_key=not is_pulse_map,
         )
 
@@ -140,7 +143,7 @@ class ParquetToSQLiteConverter(LoggerMixin):
             if df.columns == ["values"]:
                 df.columns = [field_name]
 
-        if "event_no" in df.columns:
+        if self._index_column in df.columns:
             return df
 
         # If true, the dataframe contains more than 1 row pr. event (i.e.,
@@ -163,7 +166,7 @@ class ParquetToSQLiteConverter(LoggerMixin):
                 c += 1
         else:
             event_nos = np.arange(0, n_events_in_file, 1) + self._event_counter
-        df["event_no"] = event_nos
+        df[self._index_column] = event_nos
         return df
 
     def _create_output_directories(

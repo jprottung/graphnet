@@ -35,7 +35,6 @@ arguments:
           ModelConfig:
             arguments: {options=general_config["class_options"]}
             class_name: CrossEntropyLoss
-        nb_outputs: 1
         loss_weight: null
         target_labels: pid
         transform_inference: '!lambda x: softmax(x, dim=-1)'

@@ -31,6 +31,9 @@ class FEATURES:
     ]
     KAGGLE = ["x", "y", "z", "time", "charge", "auxiliary"]
     PONE = [
+        'string_id',
+        'module_id',
+        'pmt_id'
         'pmt_x',
         'pmt_y',
         'pmt_z',
@@ -95,8 +98,8 @@ class TRUTH:
         "interaction_x",
         "interaction_y",
         "interaction_z",
-        "azimuth",
-        "zenith",
-        "pid",
-        "interaction_type"
+        "interaction_azimuth",
+        "interaction_zenith",
+        "particle_id",
+        "time"
     ]

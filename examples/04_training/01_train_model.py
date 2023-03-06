@@ -39,12 +39,12 @@ def main(
 ) -> None:
     """Run example."""
     # Initialise Weights & Biases (W&B) run
-    # wandb_logger = WandbLogger(
-    #     project="example-script",
-    #     entity="graphnet-team",
-    #     save_dir=WANDB_DIR,
-    #     log_model=True,
-    # )
+    wandb_logger = WandbLogger(
+        project="example-script",
+        entity="graphnet-team",
+        save_dir=WANDB_DIR,
+        log_model=True,
+    )
 
     # Build model
     model_config = ModelConfig.load(model_config_path)
@@ -79,10 +79,10 @@ def main(
     # Log configurations to W&B
     # NB: Only log to W&B on the rank-zero process in case of multi-GPU
     #     training.
-    # if rank_zero_only == 0:
-        # wandb_logger.experiment.config.update(config)
-        # wandb_logger.experiment.config.update(model_config.as_dict())
-        # wandb_logger.experiment.config.update(dataset_config.as_dict())
+    if rank_zero_only == 0:
+        wandb_logger.experiment.config.update(config)
+        wandb_logger.experiment.config.update(model_config.as_dict())
+        wandb_logger.experiment.config.update(dataset_config.as_dict())
 
     # Train model
     callbacks = [
@@ -93,16 +93,13 @@ def main(
         ProgressBar(),
     ]
 
-    selections = ['hit', 'noise']
-
-    for selection in selections:
-        model.fit(
-            dataloaders["_".join(["train", selection])],
-            dataloaders["_".join(["validation", selection])],
-            callbacks=callbacks,
-            # logger=wandb_logger,
-            **config.fit,
-        )
+    model.fit(
+        dataloaders["train"],
+        dataloaders["validation"],
+        callbacks=callbacks,
+        logger=wandb_logger,
+        **config.fit,
+    )
 
     # Get predictions
     if isinstance(config.target, str):
